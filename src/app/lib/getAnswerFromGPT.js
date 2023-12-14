@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const apiKey = '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'; // Move this to environment variables for security
+const apiKey = process.env.OPEN_AI_API_KEY; // Move this to environment variables for security
 const apiUrl = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
 
 async function getAnswerFromGPT(prompt) {
