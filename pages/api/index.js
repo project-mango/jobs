@@ -7,11 +7,14 @@ import applicantData from '@/app/data/ApplicantData';
 export default async function handler(req, res) {
   if (req.method === 'POST') {
         try {
+           // console.log("huh")
             const resumeUrl = applicantData.resume_link; // URL of the resume
+           // console.log(resumeUrl)
             const downloadFolder = './temp'; // Folder for the downloaded file
             const resumeFilePath = await downloadResume(resumeUrl, downloadFolder);
-
+            //console.log(resumeFilePath);
            await applyToJobs(resumeFilePath);
+           //console.log(123123)
             res.status(200).json({ message: 'Job applications started' });
         } catch (error) {
             res.status(500).json({ message: 'Error applying to jobs', error: error.message });

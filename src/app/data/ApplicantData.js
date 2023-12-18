@@ -6,7 +6,7 @@ const applicantData = {
     phone_number: "9255288216",
     pronouns: "she/her",
     portfolio_link: "https://haleyalexandralewis.com/",
-    resume_link: "https://storage.googleapis.com/uxfolio/634618ec8d59c900031ddc49/Lewis_Haley_Resume_ZPh.pdf",
+    "resume_link": "https://storage.googleapis.com/uxfolio/634618ec8d59c900031ddc49/Lewis_Haley_Resume_ZPh.pdf",
     BirthDate: "3/20/1998",
     Pronouns: "She/Her",
     Location: "138 Diablo View Drive, Orinda CA 94563",
