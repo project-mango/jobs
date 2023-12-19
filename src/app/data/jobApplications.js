@@ -3,8 +3,7 @@ const jobApplications = [
 // { url: "https://jobs.lever.co/platform-stud/9a8b8278-5ebe-4e6e-8109-c2e00876751e/apply/" }, // av: fills the required fields and resume autofiller adds some more things
    // unsucessful { url: "https://jobs.lever.co/loopreturns/9bce9d58-6c08-4c99-ba33-1f78da7691b3/apply" }, // av: same as above. except email answer had ":" in the start
 //{ url: "https://jobs.lever.co/zuru/2881367a-e584-44e2-ac73-dca4bbed73d9/apply" }, //av: same as first
-// applied 
-// { url: "https://jobs.lever.co/careernowbrands/f0a455f2-7bf6-40cc-a816-20595cdb0a64/apply?lever-source=Job%20postings%20feed" }, // av: one required checkbox was not caught
+// applied { url: "https://jobs.lever.co/careernowbrands/f0a455f2-7bf6-40cc-a816-20595cdb0a64/apply?lever-source=Job%20postings%20feed" }, // av: one required checkbox was not caught
 // did not apply {url: "https://jobs.lever.co/matchgroup/3fec4bc1-c1b9-4c61-8716-b6a9e9cdbaad/apply" }, //av: some required checkboxes left answered
 // applied ** phone number got messed up { url: "https://jobs.lever.co/blinkux/ef8be1e6-111f-4429-91a8-63482c2b7cb5/apply?lever-origin=applied&lever-source%5B%5D=weloveproduct.co" }, av: same as first
 //applied { url: "https://jobs.lever.co/evisort-2/7d3add67-4d92-4bf6-aa43-f2b44b2c0866/apply" }, av: same as first
@@ -38,5 +37,25 @@ const jobApplications = [
 // { url: "https://jobs.lever.co/coffeemeetsbagel/6836415b-8886-4640-ab2c-724acfe8aa04" }, av: gpt answered more than the option provided
 // { url: "https://jobs.lever.co/theathletic/a0b6a1eb-7278-43f3-9108-3ed26145c55e" } av: gpt added a semicolon in email and same as above
     // ... more applications
+/*{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"},
+{url: "https://jobs.lever.co/webfx/3da2493f-f66d-4a43-a910-51181d51fa50"},
+{url: "https://jobs.lever.co/webfx/0aca85ec-fc25-4cd2-ae4a-43d81301779f"},
+{url: "https://jobs.lever.co/highwirepr/2b6519dd-e2cd-423a-a87c-86585bd79987"},
+{url: "https://jobs.lever.co/highwirepr/5ebde23e-fa4d-4846-bb57-c474bb14a78c"},
+{url: "https://jobs.lever.co/hopper/e19d4426-b66e-4c6c-96d3-cb17df7b6f06"},
+{url: "https://jobs.lever.co/Traba/e2efe435-99b2-4b0b-b8c5-e9f9fe5be924"},
+{url: "https://jobs.lever.co/StubHub/42f4880d-7fb9-4a3c-8e89-95888506827e"},
+{url: "https://jobs.lever.co/wealthfront/dd0e2b58-85d5-413e-ba7f-b3e4f17b0832"},*/
+
+
+//latest links. all of these don't get scraped.
+
+{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"},
+//{url: "https://jobs.lever.co/highwirepr/2b6519dd-e2cd-423a-a87c-86585bd79987"},
+//{url: "https://jobs.lever.co/highwirepr/5ebde23e-fa4d-4846-bb57-c474bb14a78c"},
+//{url: "https://apply.workable.com/clayglobal/j/00E28EAE0F/apply/"},
+//{url: "https://jobs.lever.co/highwirepr/07dcb8c1-a0e5-4af8-9ee1-dd2d5dce943e"},
+//{url: "https://boards.greenhouse.io/faire/jobs/7066790002"},
+//{url: "https://jobs.lever.co/vrchat/4b69c06d-3cf4-4343-a19f-735fa3087f47"},
   ];
   export default jobApplications;
