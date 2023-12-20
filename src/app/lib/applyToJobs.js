@@ -232,11 +232,19 @@ async function selectDropdownOption(page, selectName, optionValue) {
     }, selectName, optionValue);
 }
 
-async function processQuestions(requiredFields, applicantData, page) {
+async function processQuestions(requiredFields, applicantData, page, resumeFilePath) {
     //console.log("waiting 30 seconds to diagnose in processQuestions")
     
     for (const field of requiredFields) {
-        
+        if(field.answers[0].type === "file"){
+            // Upload portfolio
+            const portfolioInputSelector = `input[name="${field.answers[0].name}"]`;
+            await page.waitForSelector(portfolioInputSelector);
+            const portfolioInput = await page.$(portfolioInputSelector);
+            console.log('uploading portfolio')
+            await portfolioInput.uploadFile(resumeFilePath);
+            continue;
+         }
         const context = JSON.stringify(applicantData); // Convert applicant data to a string
         const bestPracticeText = JSON.stringify(bestPractices);
         const answerOptions = field.answers.map(a => a.value).join(", "); // Create a string of answer options
@@ -368,8 +376,28 @@ async function clickApplyButton(page){
 }
 // Define a function to apply to jobs
 async function applyToJobs(resumeFilePath) {
-    // Launch the browser
-    //console.log(1);
+    for (let job of jobApplications) {
+        if (job.url.includes('workable.com')) {
+            workableJob(job, resumeFilePath);
+        } else if (job.url.includes('lever.co')) {
+            leverJob(job, resumeFilePath);
+        } else if (job.url.includes('greenhouse.io')) {
+            greenhouseJob(job, resumeFilePath);
+        }       
+        //break;
+    }
+}
+async function workableJob(job, resumeFilePath){
+    console.log('Platform: Workable');
+}
+
+async function greenhouseJob(job, resumeFilePath){
+    console.log('Platform: Greenhouse');
+}
+
+async function leverJob(job, resumeFilePath){
+    console.log('Platform: Lever');
+    //return;
     const browser = await puppeteer.launch({ headless: false , executablePath:"C:/Program Files/Google/Chrome Dev/Application/chrome.exe" ,
          }); // 'headless: false' allows you to see the browser action
     //console.log(1);
@@ -379,95 +407,91 @@ async function applyToJobs(resumeFilePath) {
       const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36';
       await page.setUserAgent(userAgent);
     //  console.log(1);
+    try {
+        // console.log(1)
+        // Open the job application URL
+        console.log("Navigating to URL:", job.url);
+        await page.goto(job.url, { waitUntil: 'domcontentloaded' });
 
-    for (let job of jobApplications) {
-        try {
-            // console.log(1)
-            // Open the job application URL
-            console.log("Navigating to URL:", job.url);
-            await page.goto(job.url, { waitUntil: 'domcontentloaded' });
+        //sometimes you can't access required field's unless you click "Apply for this job" which will take you to the actual form
+        await clickApplyButton(page);
 
-            //sometimes you can't access required field's unless you click "Apply for this job" which will take you to the actual form
-            await clickApplyButton(page);
+         // Get required fields
+         //const requiredFields = await findRequiredFieldsInFirstForm(page);
+         const requiredFields = await findRequiredFields(page);
+         //if 
+         //let output = await findRequiredFieldsInFirstForm(page);
+         //console.log("findRequiredFieldsInFirstForm:",output)
+         //output = await findRequiredFields(page);
+         //console.log("findRequiredFields:",output)
+         //return;
+         console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
 
-             // Get required fields
-             //const requiredFields = await findRequiredFieldsInFirstForm(page);
-             const requiredFields = await findRequiredFields(page);
-             //if 
-             //let output = await findRequiredFieldsInFirstForm(page);
-             //console.log("findRequiredFieldsInFirstForm:",output)
-             //output = await findRequiredFields(page);
-             //console.log("findRequiredFields:",output)
-             //return;
-             console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
+         //For each field - call gpt function -- pass through the answer options so that we can come 
+        // back here and use that answer option to select the right answer
+        //await processQuestions2(requiredFields, applicantData, page);
+        await processQuestions(requiredFields, applicantData, page, resumeFilePath);
 
-             //For each field - call gpt function -- pass through the answer options so that we can come 
-            // back here and use that answer option to select the right answer
-            //await processQuestions2(requiredFields, applicantData, page);
-            await processQuestions(requiredFields, applicantData, page);
+        console.log('starting 10 second wait')
+        await page.waitForTimeout(10000);
+        
+         // Upload the resume
+         
+         const resumeInputSelector = 'input[type="file"][name="resume"]';
+         await page.waitForSelector(resumeInputSelector);
+         const resumeInput = await page.$(resumeInputSelector);
+         console.log('uploading resume')
+         await resumeInput.uploadFile(resumeFilePath);
+         await page.waitForTimeout(10000); // waits for 10 seconds
 
-            console.log('starting 10 second wait')
-            await page.waitForTimeout(10000);
-
-             // Upload the resume
-             
-             const resumeInputSelector = 'input[type="file"][name="resume"]';
-             await page.waitForSelector(resumeInputSelector);
-             const resumeInput = await page.$(resumeInputSelector);
-             console.log('uploading resume')
-             await resumeInput.uploadFile(resumeFilePath);
-             await page.waitForTimeout(10000); // waits for 10 seconds
-
-             // Function to fill in the field if it is empty
-            async function fillFieldIfEmpty(page, selector, value) {
-                 const isEmpty = await page.$eval(selector, (el) => el.value === '');
-                 if (isEmpty) {
-                      await page.type(selector, value, { delay: 100 });
-                    }
-            }
-
-
-        // Fill in the name field if empty
-        const nameFieldSelector = 'input[name="name"]';
-        await page.waitForSelector(nameFieldSelector, { visible: true });
-        await fillFieldIfEmpty(page, nameFieldSelector, applicantData.name);
-
-        // Fill in the email field if empty
-        const emailFieldSelector = 'input[name="email"]';
-        await page.waitForSelector(emailFieldSelector, { visible: true });
-        await fillFieldIfEmpty(page, emailFieldSelector, applicantData.email);
-
-        // Fill in the phone field if empty
-        const phoneFieldSelector = 'input[name="phone"]';
-        await page.waitForSelector(phoneFieldSelector, { visible: true });
-        await fillFieldIfEmpty(page, phoneFieldSelector, applicantData.phone_number);
-
-        // Fill in the portfolio url field if empty
-        const portfolioFieldSelector = 'input[name="urls[Portfolio]"]';
-        await page.waitForSelector(portfolioFieldSelector, { visible: true });
-        await fillFieldIfEmpty(page, portfolioFieldSelector, applicantData.portfolio_link);
-
-             await page.waitForTimeout(3000);
-            console.log("submit button area reached. not submitting. just exiting.");
-            return;
-            // Additional code to find and click the submit button
-             const submitButtonSelector = '#btn-submit';
-             await page.waitForSelector(submitButtonSelector, { visible: true });
-             await page.click(submitButtonSelector);
-
-             // Wait for a while after clicking submit (optional, depends on the application's behavior)
-              await page.waitForTimeout(30000); // waits for 30 seconds
-
-        } catch (error) {
-            console.error("An error occurred on URL:", job.url, error);
-            await page.screenshot({ path: `error-${job.url.replace(/[^a-zA-Z0-9]/g, '_')}.png` });
+         
+        await page.waitForTimeout(10000); // waits for 10 seconds
+         // Function to fill in the field if it is empty
+        async function fillFieldIfEmpty(page, selector, value) {
+             const isEmpty = await page.$eval(selector, (el) => el.value === '');
+             if (isEmpty) {
+                  await page.type(selector, value, { delay: 100 });
+                }
         }
-        break;
-    }
 
+
+    // Fill in the name field if empty
+    const nameFieldSelector = 'input[name="name"]';
+    await page.waitForSelector(nameFieldSelector, { visible: true });
+    await fillFieldIfEmpty(page, nameFieldSelector, applicantData.name);
+
+    // Fill in the email field if empty
+    const emailFieldSelector = 'input[name="email"]';
+    await page.waitForSelector(emailFieldSelector, { visible: true });
+    await fillFieldIfEmpty(page, emailFieldSelector, applicantData.email);
+
+    // Fill in the phone field if empty
+    const phoneFieldSelector = 'input[name="phone"]';
+    await page.waitForSelector(phoneFieldSelector, { visible: true });
+    await fillFieldIfEmpty(page, phoneFieldSelector, applicantData.phone_number);
+
+    // Fill in the portfolio url field if empty
+    const portfolioFieldSelector = 'input[name="urls[Portfolio]"]';
+    await page.waitForSelector(portfolioFieldSelector, { visible: true });
+    await fillFieldIfEmpty(page, portfolioFieldSelector, applicantData.portfolio_link);
+
+    
+    console.log("submit button area reached. not submitting. just exiting.");
+        return;
+        // Additional code to find and click the submit button
+         const submitButtonSelector = '#btn-submit';
+         await page.waitForSelector(submitButtonSelector, { visible: true });
+         await page.click(submitButtonSelector);
+
+         // Wait for a while after clicking submit (optional, depends on the application's behavior)
+          await page.waitForTimeout(30000); // waits for 30 seconds
+
+    } catch (error) {
+        console.error("An error occurred on URL:", job.url, error);
+        await page.screenshot({ path: `error-${job.url.replace(/[^a-zA-Z0-9]/g, '_')}.png` });
+    }
     await browser.close();
 }
-
 // Run the function
 //applyToJobs();
 
