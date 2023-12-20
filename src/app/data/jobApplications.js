@@ -47,10 +47,20 @@ const jobApplications = [
 // {url: "https://jobs.lever.co/StubHub/42f4880d-7fb9-4a3c-8e89-95888506827e"}, // everything fill here correctly
 // {url: "https://jobs.lever.co/wealthfront/dd0e2b58-85d5-413e-ba7f-b3e4f17b0832"}, // one response was wrong with else was correctly filled
 
-{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"}, // everything is filled here correctly
-{url: "https://apply.workable.com/clayglobal/j/00E28EAE0F/apply/"},
-{url: "https://jobs.lever.co/highwirepr/07dcb8c1-a0e5-4af8-9ee1-dd2d5dce943e"}, //everything is fulled here correctly
-{url: "https://boards.greenhouse.io/faire/jobs/7066790002"},
-{url: "https://jobs.lever.co/vrchat/4b69c06d-3cf4-4343-a19f-735fa3087f47"}, // almost  everything is filled except for a file upload for sharing of portfolio
-  ];
+//{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"}, // everything is filled here correctly
+//{url: "https://apply.workable.com/clayglobal/j/00E28EAE0F/apply/"},
+//{ url: "https://apply.workable.com/digital-waffle-2/j/A2C1F8B219/apply/" },
+{ url: "https://apply.workable.com/otiv/j/957F3CDC01/" },
+//{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/" },
+//{ url: "https://apply.workable.com/unreal-gigs/j/40E5B5B1E1/" },
+//{ url: "https://apply.workable.com/twine/j/B9A33D7A79/" },
+//{ url: "https://apply.workable.com/droids-on-roids-1/j/7BE4172A4B/" },
+//{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/apply/" },
+
+//{url: "https://jobs.lever.co/highwirepr/07dcb8c1-a0e5-4af8-9ee1-dd2d5dce943e"}, //everything is fulled here correctly
+//{url: "https://boards.greenhouse.io/faire/jobs/7066790002"},
+//{url: "https://jobs.lever.co/vrchat/4b69c06d-3cf4-4343-a19f-735fa3087f47"}, // almost  everything is filled except for a file upload for sharing of portfolio
+  
+
+];
   export default jobApplications;
