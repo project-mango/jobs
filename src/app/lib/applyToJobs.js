@@ -14,6 +14,14 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 puppeteer.use(StealthPlugin());
 
 async function findRequiredFields(page) {
+    // wait for form to load
+    await page.waitForSelector('form');
+    const form = await page.$('form');
+    // check if form exists incase of bug
+    if (!form) {
+        console.log('No form found on the page. ');
+        return [];
+    }
     const selectors = [
         '.application-question.custom-question',
         '.application-question', 
@@ -28,6 +36,7 @@ async function findRequiredFields(page) {
     for (const selector of selectors) {
         requiredFieldContainers = await page.$$(selector);
         if (requiredFieldContainers.length > 0) {
+            console.log(selector+" worked.")
             break;
         }else{
             console.log(selector+" did not work.")
@@ -38,7 +47,7 @@ async function findRequiredFields(page) {
     if (requiredFieldContainers.length === 0) {
         return 'No required fields found';
     }
-    //const requiredFieldContainers = await page.$$('.application-question.custom-question');
+    // requiredFieldContainers = await page.$('#application-form');
 
     const fieldDetails = await Promise.all(requiredFieldContainers.map(async container => {
         const questionText = await container.$eval('.text', el => el.innerText.trim());
@@ -234,9 +243,9 @@ async function processQuestions(requiredFields, applicantData, page) {
 
         // Construct a prompt that includes the answer options
         const prompt = `Given the context: ${context}, and the answer options: ${answerOptions}, what is the best answer for the question: ${field.question}? Use these best practices ${bestPracticeText}`;
-
+        console.log("Question: ", field.question);
         const answer = await getAnswerFromGPT(prompt);
-        console.log("Answer:", answer);
+        console.log("GPT Answer:", answer);
 
        // Check if the field is a textarea or an input
        if (field.answers.length === 0 || field.answers[0].type === "textarea" || field.answers[0].type === "text") {
@@ -252,8 +261,8 @@ async function processQuestions(requiredFields, applicantData, page) {
          } else {
             // Logic to interact with radio or checkbox fields based on the GPT answer
             for (const option of field.answers) {
-                console.log('This is option.value:', option.value);
-                if (option.value === answer) {
+                //console.log('This is option.value:', option.value);
+                if (isMatch(option.value, answer)) {
                     if (option.type === "radio" || option.type === "checkbox") {
                         // Click the radio button or checkbox
                         const selector = `input[name="${option.name}"][value="${option.value}"]`;
@@ -262,11 +271,21 @@ async function processQuestions(requiredFields, applicantData, page) {
                         await page.click(selector);
                     }
                     // Add logic for other types of fields if necessary
-                    break;
+                    //break; // removing break because some questions with checkbox may want more than 1 answer selected
                 }
             }
         }
     }
+}
+function isMatch(optionValue, answer) {
+    // Normalize both strings
+    const normalize = (str) => str.toLowerCase().trim();
+
+    const normalizedOptionValue = normalize(optionValue);
+    const normalizedAnswer = normalize(answer);
+
+    // Check if one string contains the other
+    return normalizedAnswer.includes(normalizedOptionValue) || normalizedOptionValue.includes(normalizedAnswer);
 }
 async function processQuestions2(requiredFields, applicantData, page) {
    
@@ -366,7 +385,7 @@ async function applyToJobs(resumeFilePath) {
             // console.log(1)
             // Open the job application URL
             console.log("Navigating to URL:", job.url);
-            await page.goto(job.url, { waitUntil: 'networkidle2' });
+            await page.goto(job.url, { waitUntil: 'domcontentloaded' });
 
             //sometimes you can't access required field's unless you click "Apply for this job" which will take you to the actual form
             await clickApplyButton(page);
@@ -385,7 +404,7 @@ async function applyToJobs(resumeFilePath) {
              //For each field - call gpt function -- pass through the answer options so that we can come 
             // back here and use that answer option to select the right answer
             //await processQuestions2(requiredFields, applicantData, page);
-            //await processQuestions(requiredFields, applicantData, page);
+            await processQuestions(requiredFields, applicantData, page);
 
             console.log('starting 10 second wait')
             await page.waitForTimeout(10000);

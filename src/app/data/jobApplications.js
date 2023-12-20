@@ -37,25 +37,20 @@ const jobApplications = [
 // { url: "https://jobs.lever.co/coffeemeetsbagel/6836415b-8886-4640-ab2c-724acfe8aa04" }, av: gpt answered more than the option provided
 // { url: "https://jobs.lever.co/theathletic/a0b6a1eb-7278-43f3-9108-3ed26145c55e" } av: gpt added a semicolon in email and same as above
     // ... more applications
-/*{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"},
-{url: "https://jobs.lever.co/webfx/3da2493f-f66d-4a43-a910-51181d51fa50"},
-{url: "https://jobs.lever.co/webfx/0aca85ec-fc25-4cd2-ae4a-43d81301779f"},
-{url: "https://jobs.lever.co/highwirepr/2b6519dd-e2cd-423a-a87c-86585bd79987"},
-{url: "https://jobs.lever.co/highwirepr/5ebde23e-fa4d-4846-bb57-c474bb14a78c"},
-{url: "https://jobs.lever.co/hopper/e19d4426-b66e-4c6c-96d3-cb17df7b6f06"},
-{url: "https://jobs.lever.co/Traba/e2efe435-99b2-4b0b-b8c5-e9f9fe5be924"},
-{url: "https://jobs.lever.co/StubHub/42f4880d-7fb9-4a3c-8e89-95888506827e"},
-{url: "https://jobs.lever.co/wealthfront/dd0e2b58-85d5-413e-ba7f-b3e4f17b0832"},*/
+// {url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"}, // everything is filled here correctly
+// {url: "https://jobs.lever.co/webfx/3da2493f-f66d-4a43-a910-51181d51fa50"}, // everything is filled here correctly
+// {url: "https://jobs.lever.co/webfx/0aca85ec-fc25-4cd2-ae4a-43d81301779f"}, // everything is filled here correctly
+// {url: "https://jobs.lever.co/highwirepr/2b6519dd-e2cd-423a-a87c-86585bd79987"}, //everything is filled here correctly
+// {url: "https://jobs.lever.co/highwirepr/5ebde23e-fa4d-4846-bb57-c474bb14a78c"}, //everything is filled here correctly
+// {url: "https://jobs.lever.co/hopper/e19d4426-b66e-4c6c-96d3-cb17df7b6f06"}, //everything is filled here correctly
+// {url: "https://jobs.lever.co/Traba/e2efe435-99b2-4b0b-b8c5-e9f9fe5be924"}, //everything is filled here correctly
+// {url: "https://jobs.lever.co/StubHub/42f4880d-7fb9-4a3c-8e89-95888506827e"}, // one radio question not answered
+//{url: "https://jobs.lever.co/wealthfront/dd0e2b58-85d5-413e-ba7f-b3e4f17b0832"}, // one response was wrong with else was correctly filled
 
-
-//latest links. all of these don't get scraped.
-
-{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"},
-//{url: "https://jobs.lever.co/highwirepr/2b6519dd-e2cd-423a-a87c-86585bd79987"},
-//{url: "https://jobs.lever.co/highwirepr/5ebde23e-fa4d-4846-bb57-c474bb14a78c"},
+//{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"}, // everything is filled here correctly
 //{url: "https://apply.workable.com/clayglobal/j/00E28EAE0F/apply/"},
-//{url: "https://jobs.lever.co/highwirepr/07dcb8c1-a0e5-4af8-9ee1-dd2d5dce943e"},
+//{url: "https://jobs.lever.co/highwirepr/07dcb8c1-a0e5-4af8-9ee1-dd2d5dce943e"}, //everything is fulled here correctly
 //{url: "https://boards.greenhouse.io/faire/jobs/7066790002"},
-//{url: "https://jobs.lever.co/vrchat/4b69c06d-3cf4-4343-a19f-735fa3087f47"},
+//{url: "https://jobs.lever.co/vrchat/4b69c06d-3cf4-4343-a19f-735fa3087f47"}, // almost  everything is filled except for a file upload for sharing of portfolio
   ];
   export default jobApplications;
