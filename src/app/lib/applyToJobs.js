@@ -118,8 +118,46 @@ async function findRequiredFieldsWorkable(page, selectors) {
 
     // Extract field details, skipping already filled fields
     const fieldDetails = await Promise.all(requiredFieldContainers.map(async container => {
-        const outerHTML = await container.evaluate(element => element.outerHTML);
-        console.log(outerHTML);
+        const questionTextHandle = await container.$('span.styles--3da4O');
+        const questionText = questionTextHandle ? await page.evaluate(el => el.textContent, questionTextHandle) : '';
+
+        // Check if it's a text input or radio button group
+        const inputHandle = await container.$('input[type="text"], textarea[required]');
+        const radioGroupHandle = await container.$('fieldset');
+        const dropdownHandle = await container.$('div[data-ui][data-input-type="select"]');
+        
+        if (inputHandle) {
+            // Handle text input
+            const name = await page.evaluate(el => el.name, inputHandle);
+            const value = await page.evaluate(el => el.value, inputHandle);
+            if (value !== '') return null;
+            const type = await page.evaluate(el => el.type, inputHandle);
+
+            return {
+                question: questionText,
+                answers: [{ name, value, type }]
+            };
+        } else if (radioGroupHandle) {
+            // Handle radio group
+            const radioButtons = await container.$$('input[type="radio"]');
+            const answers = await Promise.all(radioButtons.map(async radioButton => {
+                const name = await page.evaluate(el => el.name, radioButton);
+                const value = await page.evaluate(el => el.value, radioButton);
+                const type = await page.evaluate(el => el.type, radioButton);
+
+                return { name, value, type };
+            }));
+
+            return {
+                question: questionText,
+                answers
+            };
+        } else {
+            // No recognized input type found
+            return null;
+        }
+        /*const outerHTML = await container.evaluate(element => element.outerHTML);
+        //console.log(outerHTML);
         
         //if (value !== '') {
         //    return null; // Skip this input as it already has a value
@@ -129,19 +167,19 @@ async function findRequiredFieldsWorkable(page, selectors) {
         const name = await container.evaluate(el => el.name);
         const type = await container.evaluate(el => el.type);
         const value = await container.evaluate(el => el.value);
-        if((type === 'text' || type === 'email' || type === 'tel') && value !== ''){
-            return null;
-        }
+       
 
+        // Assuming 'container' is the ElementHandle of the parent element that contains your span
+        //const labelSelector = ".styles--2kqW6";
+
+        // Find the label element inside the container
+        //const labelElement = await container.$(labelSelector);
+
+        // Extract the text from the label element
         let questionText = '';
-        // Adjust the XPath to target the span with the class 'styles--3da4O'
-        const labelElement = await container.$x(".//span[contains(@class, 'styles--3da4O')]");
-        
-        if (labelElement.length > 0) {
-            questionText = await labelElement[0].evaluate(el => el.innerText.trim());
-        } else {
-            questionText = name;
-        }
+        //if (labelElement) {
+        //    questionText = await labelElement.evaluate(el => el.innerText.trim());
+        //}
         
         // Structure the data into the desired format
         //console.log({question: questionText, answers: [{name: name, value: value, type: type}]});
@@ -154,10 +192,10 @@ async function findRequiredFieldsWorkable(page, selectors) {
                     type: type
                 }
             ]
-        };
+        };*/
     }));
     //console.log(fieldDetails.filter(detail => detail.answers.length > 0))
-    return fieldDetails.filter(detail => detail && detail.answers.length > 0);
+    return fieldDetails.filter(item => item);
 }
 
 
@@ -470,7 +508,7 @@ async function applyToJobs(resumeFilePath) {
     }
 }
 
-async function fillIfEmpty(page, selector, dataToFillWith, timeout = 5000) {
+async function fillIfEmpty(page, selector, dataToFillWith, timeout = 3000) {
     try {
         // Wait for the input element to be available, with a timeout
         await page.waitForSelector(selector, { timeout });
@@ -526,14 +564,14 @@ async function workableJob(job, resumeFilePath){
         console.log('Uploading resume');
         await fileInput.uploadFile(resumeFilePath);
 
-        console.log("Completed form filling. Wait for 20 seconds");
-        await page.waitForTimeout(20000); // waits for 30 seconds
+        console.log("Completed form filling. Wait for 10 seconds");
+        await page.waitForTimeout(10000); // waits for 30 seconds
 
-        await fillIfEmpty(page, 'input#firstname[required]', applicantData.first_name);
-        await fillIfEmpty(page, 'input#lastname[required]', applicantData.last_name);
-        await fillIfEmpty(page, 'input#email[required]', applicantData.email);
+        await fillIfEmpty(page, `input[name='firstname'][required]`, applicantData.first_name);
+        await fillIfEmpty(page, `input[name='lastname'][required]`, applicantData.last_name);
+        await fillIfEmpty(page, `input[name='email'][required]`, applicantData.email);
         await fillIfEmpty(page, `input[name='phone'][required]`, applicantData.phone_number);
-        await fillIfEmpty(page, 'input#address[required]', applicantData.Location);
+        await fillIfEmpty(page, `input[name='address'][required]`, applicantData.Location);
         
         
 
@@ -542,17 +580,29 @@ async function workableJob(job, resumeFilePath){
            //".styles--1jc0L",
            //".styles--3JEd1",
            //`span[class='styles--332ku']`,
-           "input[required]",
+           //"input[required]",
+           //"div.styles--3aPac",
+
+           //"div.styles--1jc0L",
+           //"form.styles--2I-rr"
+           "div.styles--3JEd1"
         ];
     
         const requiredFields = await findRequiredFieldsWorkable(page, selectors);
         console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
 
-        //await processQuestionsWorkable(requiredFields, applicantData, page, resumeFilePath);
+        await processQuestions(requiredFields, applicantData, page, resumeFilePath);
 
-        const checkboxSelector = 'input[name="gdpr"]';
-        await page.waitForSelector(checkboxSelector);
-        await page.click(checkboxSelector);
+        const checkboxSelector = 'input[name="gdpr"]';       
+        const timeout = 5000;
+        try {
+            // Wait for the input element to be available, with a timeout
+            await page.waitForSelector(checkboxSelector, { timeout });
+            await page.click(checkboxSelector);
+        } catch (error) {
+            // Log the error and continue execution if the selector doesn't exist or times out
+            console.log(`Selector "${checkboxSelector}" not found or timed out after ${timeout} ms.`, error.message);
+        }
         return;
         // Uncomment below lines to submit the form and take a screenshot
         const submitButtonSelector = '#btn-submit';

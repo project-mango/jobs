@@ -48,15 +48,18 @@ const jobApplications = [
 // {url: "https://jobs.lever.co/wealthfront/dd0e2b58-85d5-413e-ba7f-b3e4f17b0832"}, // one response was wrong with else was correctly filled
 
 //{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"}, // everything is filled here correctly
-//{url: "https://apply.workable.com/clayglobal/j/00E28EAE0F/apply/"},
+//{url: "https://apply.workable.com/clayglobal/j/00E28EAE0F/apply/"}, // fill everything 
 //{ url: "https://apply.workable.com/digital-waffle-2/j/A2C1F8B219/apply/" }, // fills everything
-{ url: "https://apply.workable.com/otiv/j/957F3CDC01/" },
-//{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/" },
+//{ url: "https://apply.workable.com/otiv/j/957F3CDC01/" }, // fills everything
+//{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/" }, // fills everything, 1 completely wrong answer
 //{ url: "https://apply.workable.com/unreal-gigs/j/40E5B5B1E1/" }, // fills everything
 //{ url: "https://apply.workable.com/twine/j/B9A33D7A79/" }, // fills everything
-//{ url: "https://apply.workable.com/droids-on-roids-1/j/7BE4172A4B/" },
-//{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/apply/" },
-
+//{ url: "https://apply.workable.com/droids-on-roids-1/j/7BE4172A4B/" }, //fills everything
+//{ url: "https://apply.workable.com/trademaniaapp/j/28D0A2346B/" }, //fills everything
+//{ url: "https://apply.workable.com/blackstone-eit-2/j/9876B5CCDA/" }, // fills everything
+//{ url: "https://apply.workable.com/leadtech/j/715C823430/apply/" }, // fills everything except dropdown menu, which it doesn't even catch
+//{ url: "https://apply.workable.com/twine/j/AB5C3B58F5/" }, //fills everything
+//{ url: "https://apply.workable.com/rebellion/j/26C3E166B4/" } // this application opens the company's page and share card, (maybe to prevent bots?)
 //{url: "https://jobs.lever.co/highwirepr/07dcb8c1-a0e5-4af8-9ee1-dd2d5dce943e"}, //everything is fulled here correctly
 //{url: "https://boards.greenhouse.io/faire/jobs/7066790002"},
 //{url: "https://jobs.lever.co/vrchat/4b69c06d-3cf4-4343-a19f-735fa3087f47"}, // almost  everything is filled except for a file upload for sharing of portfolio
