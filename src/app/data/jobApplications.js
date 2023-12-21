@@ -49,11 +49,11 @@ const jobApplications = [
 
 //{url: "https://jobs.lever.co/highwirepr/c5f6c5c7-4e40-4dfb-88f1-1800c5b66f03"}, // everything is filled here correctly
 //{url: "https://apply.workable.com/clayglobal/j/00E28EAE0F/apply/"},
-//{ url: "https://apply.workable.com/digital-waffle-2/j/A2C1F8B219/apply/" },
+//{ url: "https://apply.workable.com/digital-waffle-2/j/A2C1F8B219/apply/" }, // fills everything
 { url: "https://apply.workable.com/otiv/j/957F3CDC01/" },
 //{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/" },
-//{ url: "https://apply.workable.com/unreal-gigs/j/40E5B5B1E1/" },
-//{ url: "https://apply.workable.com/twine/j/B9A33D7A79/" },
+//{ url: "https://apply.workable.com/unreal-gigs/j/40E5B5B1E1/" }, // fills everything
+//{ url: "https://apply.workable.com/twine/j/B9A33D7A79/" }, // fills everything
 //{ url: "https://apply.workable.com/droids-on-roids-1/j/7BE4172A4B/" },
 //{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/apply/" },
 

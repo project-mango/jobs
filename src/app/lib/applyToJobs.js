@@ -82,6 +82,14 @@ async function findRequiredFieldsWorkable(page, selectors) {
     await page.waitForSelector('form');
     const form = await page.$('form');
 
+    await page.waitForSelector('label');
+    const label = await page.$('label');
+
+    // Check if the form exists to handle potential errors
+    if (!label) {
+        console.log('No label found on the page.');
+        return [];
+    }
     // Check if the form exists to handle potential errors
     if (!form) {
         console.log('No form found on the page.');
@@ -104,32 +112,52 @@ async function findRequiredFieldsWorkable(page, selectors) {
     // Return a message if no required fields are found
     if (requiredFieldContainers.length === 0) {
         return 'No required fields found';
+    }else{
+        console.log("Containers found:"+ requiredFieldContainers.length);
     }
 
     // Extract field details, skipping already filled fields
     const fieldDetails = await Promise.all(requiredFieldContainers.map(async container => {
-        const questionText = await container.$eval('label', label => label.innerText.trim());
+        const outerHTML = await container.evaluate(element => element.outerHTML);
+        console.log(outerHTML);
+        
+        //if (value !== '') {
+        //    return null; // Skip this input as it already has a value
+        //}
 
-        const fields = await container.$$('input, textarea, select');
-        const fieldData = await Promise.all(fields.map(async field => {
-            const name = await field.evaluate(el => el.name || el.id);
-            const value = await field.evaluate(el => el.value);
-            const type = await field.evaluate(el => el.type || el.nodeName.toLowerCase());
-
-            // Skip fields that are already filled
-            if (value === '') {
-                return { name, type };
-            }
+        // Extract the field's name and type
+        const name = await container.evaluate(el => el.name);
+        const type = await container.evaluate(el => el.type);
+        const value = await container.evaluate(el => el.value);
+        if((type === 'text' || type === 'email' || type === 'tel') && value !== ''){
             return null;
-        }));
+        }
 
-        // Filter out null values (fields that were skipped)
-        const filteredFieldData = fieldData.filter(field => field !== null);
-
-        return { question: questionText, answers: filteredFieldData };
+        let questionText = '';
+        // Adjust the XPath to target the span with the class 'styles--3da4O'
+        const labelElement = await container.$x(".//span[contains(@class, 'styles--3da4O')]");
+        
+        if (labelElement.length > 0) {
+            questionText = await labelElement[0].evaluate(el => el.innerText.trim());
+        } else {
+            questionText = name;
+        }
+        
+        // Structure the data into the desired format
+        //console.log({question: questionText, answers: [{name: name, value: value, type: type}]});
+        return {
+            question: questionText,
+            answers: [
+                {
+                    name: name,
+                    value: value,//"", // The value is empty since we are skipping filled inputs
+                    type: type
+                }
+            ]
+        };
     }));
-
-    return fieldDetails.filter(detail => detail.answers.length > 0);
+    //console.log(fieldDetails.filter(detail => detail.answers.length > 0))
+    return fieldDetails.filter(detail => detail && detail.answers.length > 0);
 }
 
 
@@ -441,6 +469,28 @@ async function applyToJobs(resumeFilePath) {
         //break;
     }
 }
+
+async function fillIfEmpty(page, selector, dataToFillWith, timeout = 5000) {
+    try {
+        // Wait for the input element to be available, with a timeout
+        await page.waitForSelector(selector, { timeout });
+
+        // Check if the input field is empty
+        const isEmpty = await page.evaluate(selector => {
+            const inputElement = document.querySelector(selector);
+            return inputElement && inputElement.value === '';
+        }, selector);
+
+        // If the input field is empty, fill it
+        if (isEmpty) {
+            await page.type(selector, dataToFillWith);
+        }
+    } catch (error) {
+        // Log the error and continue execution if the selector doesn't exist or times out
+        console.log(`Selector "${selector}" not found or timed out after ${timeout} ms.`, error.message);
+    }
+}
+
 async function workableJob(job, resumeFilePath){
     console.log('Platform: Workable');
     const browser = await puppeteer.launch({ 
@@ -475,20 +525,34 @@ async function workableJob(job, resumeFilePath){
         const fileInput = await page.$(fileInputSelector);
         console.log('Uploading resume');
         await fileInput.uploadFile(resumeFilePath);
+
+        console.log("Completed form filling. Wait for 20 seconds");
+        await page.waitForTimeout(20000); // waits for 30 seconds
+
+        await fillIfEmpty(page, 'input#firstname[required]', applicantData.first_name);
+        await fillIfEmpty(page, 'input#lastname[required]', applicantData.last_name);
+        await fillIfEmpty(page, 'input#email[required]', applicantData.email);
+        await fillIfEmpty(page, `input[name='phone'][required]`, applicantData.phone_number);
+        await fillIfEmpty(page, 'input#address[required]', applicantData.Location);
         
-        console.log("Completed form filling. Wait for 30 seconds");
-        await page.waitForTimeout(30000); // waits for 30 seconds
+        
 
         
         const selectors = [
            //".styles--1jc0L",
            //".styles--3JEd1",
+           //`span[class='styles--332ku']`,
+           "input[required]",
         ];
     
-        //const requiredFields = await findRequiredFieldsWorkable(page, selectors);
-        //console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
+        const requiredFields = await findRequiredFieldsWorkable(page, selectors);
+        console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
 
         //await processQuestionsWorkable(requiredFields, applicantData, page, resumeFilePath);
+
+        const checkboxSelector = 'input[name="gdpr"]';
+        await page.waitForSelector(checkboxSelector);
+        await page.click(checkboxSelector);
         return;
         // Uncomment below lines to submit the form and take a screenshot
         const submitButtonSelector = '#btn-submit';
