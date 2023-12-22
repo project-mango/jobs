@@ -1,12 +1,13 @@
 const jobApplications = [
    // av = ashish version
 // { url: "https://jobs.lever.co/platform-stud/9a8b8278-5ebe-4e6e-8109-c2e00876751e/apply/" }, // av: fills the required fields and resume autofiller adds some more things
-   // unsucessful { url: "https://jobs.lever.co/loopreturns/9bce9d58-6c08-4c99-ba33-1f78da7691b3/apply" }, // av: same as above. except email answer had ":" in the start
+//{ url: "https://jobs.lever.co/loopreturns/9bce9d58-6c08-4c99-ba33-1f78da7691b3/apply" }, // av: same as above. except email answer had ":" in the start
 //{ url: "https://jobs.lever.co/zuru/2881367a-e584-44e2-ac73-dca4bbed73d9/apply" }, //av: same as first
 // applied { url: "https://jobs.lever.co/careernowbrands/f0a455f2-7bf6-40cc-a816-20595cdb0a64/apply?lever-source=Job%20postings%20feed" }, // av: one required checkbox was not caught
 // did not apply {url: "https://jobs.lever.co/matchgroup/3fec4bc1-c1b9-4c61-8716-b6a9e9cdbaad/apply" }, //av: some required checkboxes left answered
 // applied ** phone number got messed up { url: "https://jobs.lever.co/blinkux/ef8be1e6-111f-4429-91a8-63482c2b7cb5/apply?lever-origin=applied&lever-source%5B%5D=weloveproduct.co" }, av: same as first
-//applied { url: "https://jobs.lever.co/evisort-2/7d3add67-4d92-4bf6-aa43-f2b44b2c0866/apply" }, av: same as first
+//applied 
+//{ url: "https://jobs.lever.co/evisort-2/7d3add67-4d92-4bf6-aa43-f2b44b2c0866/apply" }, //av: same as first
 //{ url: "https://jobs.lever.co/cgsfederal/aaf0e05b-2371-4086-b39e-24f88d2d1511/apply" }, //av:dropdown doesn't work.  rest is good.
 // applied { url: "https://jobs.lever.co/careernowbrands/f0a455f2-7bf6-40cc-a816-20595cdb0a64/apply?lever-source=Job%20postings%20feed" },
 // put the answer to a question in the wrong field { url: "https://jobs.lever.co/timelycare/7060cb75-3d59-4bff-b711-c98a2cf9c0b7/apply" }, //av: answers everything except dropdown menu
@@ -51,7 +52,7 @@ const jobApplications = [
 //{url: "https://apply.workable.com/clayglobal/j/00E28EAE0F/apply/"}, // fill everything 
 //{ url: "https://apply.workable.com/digital-waffle-2/j/A2C1F8B219/apply/" }, // fills everything
 //{ url: "https://apply.workable.com/otiv/j/957F3CDC01/" }, // fills everything
-//{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/" }, // fills everything, 1 completely wrong answer
+//{ url: "https://apply.workable.com/second-bind/j/13D0FAAE40/" }, // fills everything, gpt answered correctly (1st: wrong, 2nd: right)
 //{ url: "https://apply.workable.com/unreal-gigs/j/40E5B5B1E1/" }, // fills everything
 //{ url: "https://apply.workable.com/twine/j/B9A33D7A79/" }, // fills everything
 //{ url: "https://apply.workable.com/droids-on-roids-1/j/7BE4172A4B/" }, //fills everything
@@ -64,6 +65,19 @@ const jobApplications = [
 //{url: "https://boards.greenhouse.io/faire/jobs/7066790002"},
 //{url: "https://jobs.lever.co/vrchat/4b69c06d-3cf4-4343-a19f-735fa3087f47"}, // almost  everything is filled except for a file upload for sharing of portfolio
   
+
+
+{ url: "https://boards.greenhouse.io/rvohealth/jobs/4352369005" },
+//{ url: "https://boards.greenhouse.io/affirm/jobs/5826511003" },
+//{ url: "https://boards.greenhouse.io/lastpass/jobs/4351184005" },
+//{ url: "https://boards.greenhouse.io/axon/jobs/5730344003?t=e4ea2ebb3us" },
+//{ url: "https://boards.greenhouse.io/affirm/jobs/5826513003" },
+//{ url: "https://boards.greenhouse.io/hugeinc/jobs/5552876" },
+//{ url: "https://boards.greenhouse.io/flohealth/jobs/5837145003?utm_source=The+FutureList+job+board&utm_medium=getro.com&gh_src=The+FutureList+job+board" },
+//{ url: "https://boards.greenhouse.io/onetrust/jobs/5582677" },
+//{ url: "https://boards.greenhouse.io/diligentcorporation/jobs/5037623004" },
+//{ url: "https://boards.greenhouse.io/webflow/jobs/5578685" }
+
 
 ];
   export default jobApplications;

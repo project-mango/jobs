@@ -198,6 +198,100 @@ async function findRequiredFieldsWorkable(page, selectors) {
     return fieldDetails.filter(item => item);
 }
 
+async function findRequiredFieldsGreenhouse(page, selectors) {
+    // Wait for the form to load
+    await page.waitForSelector('form');
+    const form = await page.$('form');
+
+    await page.waitForSelector('label');
+    const label = await page.$('label');
+
+    // Check if the form exists to handle potential errors
+    if (!label) {
+        console.log('No label found on the page.');
+        return [];
+    }
+    // Check if the form exists to handle potential errors
+    if (!form) {
+        console.log('No form found on the page.');
+        return [];
+    }
+
+    let requiredFieldContainers = [];
+
+    // Iterate through selectors to find required fields
+    for (const selector of selectors) {
+        requiredFieldContainers = await page.$$(selector);
+        if (requiredFieldContainers.length > 0) {
+            console.log(`${selector} worked.`);
+            break;
+        } else {
+            console.log(`${selector} did not work.`);
+        }
+    }
+
+    // Return a message if no required fields are found
+    if (requiredFieldContainers.length === 0) {
+        return 'No required fields found';
+    }else{
+        console.log("Containers found:"+ requiredFieldContainers.length);
+    }
+
+    // Extract field details, skipping already filled fields
+    const fieldDetails = await Promise.all(requiredFieldContainers.map(async container => {
+        // Check if the container has an input with 'aria-required="true"'
+        const isRequired = await container.$eval('[aria-required="true"]', () => true).catch(() => false);
+
+        if (isRequired) {
+            // Extract the label (question)
+            const question = await container.$eval('label', label => label.innerText.trim());
+
+           let name, type, value, options = [];
+
+            // Extract the input field (e.g., for further actions like filling it out)
+            const inputField = await container.$('input[aria-required="true"]');
+            const selectField = await container.$('select')
+             // Extract the field's name and type
+             if (inputField) {
+                // Extract name, type, and value from the input field
+                let result = await inputField.evaluate(input => {
+                    return {
+                        name: input.name,
+                        type: input.type,
+                        value: input.value
+                    };
+                });
+                name = result.name;
+                type = result.type;
+                value = result.value;
+                //console.log(`Name: ${name}, Type: ${type}, Value: ${value}`);
+            }else if(selectField){
+                //create a list of answers where each option is stored like name, value and type
+                const name = await selectField.evaluate(select => select.name);
+                options = await selectField.$$eval('option', (opts, selectName) => opts
+                    .filter(opt => opt.value.trim() !== '') // Filter out options with empty value
+                    .map(opt => ({
+                        name: selectName, // The name of the select, as each option doesn't have its own unique name
+                        type: 'select',
+                        value: opt.textContent.trim()
+                    }))
+                , name);
+            }
+            
+            //console.log(question);
+            return {
+                question: question,
+                answers: options.length > 0 ? options : [{
+                    name: name,
+                    value: value,
+                    type: type
+                }]
+            };
+            
+        }
+    }));
+    return fieldDetails.filter(el=>el);
+};
 
 async function findRequiredFieldsInFirstForm(page) {
     await page.waitForSelector('form');
@@ -390,6 +484,7 @@ async function processQuestions(requiredFields, applicantData, page, resumeFileP
             for (const option of field.answers) {
                 //console.log('This is option.value:', option.value);
                 if (isMatch(option.value, answer)) {
+                    console.log('This is option.value:', option.value);
                     if (option.type === "radio" || option.type === "checkbox") {
                         // Click the radio button or checkbox
                         const selector = `input[name="${option.name}"][value="${option.value}"]`;
@@ -476,24 +571,27 @@ async function processQuestions2(requiredFields, applicantData, page) {
 
 
 // a simple function for finding the "apply for this job" button
-async function clickApplyButton(buttonName, page){
-    try{
+async function clickApplyButton(buttonName, page, timeout = 3000){
+    try {
         const applyButtonSelect = buttonName;
-        await page.waitForSelector(applyButtonSelect, {visible :true});
-        const applyButton = await page.$(applyButtonSelect);
-        if (!applyButton) {
-            console.log("Apply button not found. Exiting function.");
-            return; // exit incase not found so that this function doesn't hang
+        const check = await page.waitForSelector(applyButtonSelect, {timeout: timeout, visible: true});
+        if (check) {
+            const applyButton = await page.$(applyButtonSelect);
+            if (!applyButton) {
+                console.log("Apply button not found.");
+                return; // Exit if not found to prevent hanging
+            }
+        } else {
+            return;
         }
-        
 
         await page.click(applyButtonSelect);
-
         console.log("Clicked on apply button to access job form");
-    }catch(error){
-        console.error("Error in function:clickApplyButton() clicking on the Apply button:", error);
+    } catch (error) {
+        console.log("An error occurred while clicking the apply button.");
     }
 }
+
 // Define a function to apply to jobs
 async function applyToJobs(resumeFilePath) {
     for (let job of jobApplications) {
@@ -620,6 +718,56 @@ async function workableJob(job, resumeFilePath){
 
 async function greenhouseJob(job, resumeFilePath){
     console.log('Platform: Greenhouse');
+    const browser = await puppeteer.launch({ 
+        headless: false, 
+        executablePath: "C:/Program Files/Google/Chrome Dev/Application/chrome.exe"
+    });
+
+    const page = await browser.newPage();
+    const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36';
+    await page.setUserAgent(userAgent);
+
+    try {
+        console.log("Navigating to URL:", job.url);
+        await page.goto(job.url, { waitUntil: 'domcontentloaded' });
+
+        await clickApplyButton("#apply_button", page); // thats name for those button in greenhouse
+        const selectors = [
+            ".field",//`[aria-required="true"]`
+        ];
+    
+        const requiredFields = await findRequiredFieldsGreenhouse(page, selectors);
+        console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
+        
+        await processQuestions(requiredFields, applicantData, page, resumeFilePath);
+        return;
+        // Upload the resume
+        const resumeInputSelector = 'input[type="file"][name="resume"]';
+        await page.waitForSelector(resumeInputSelector);
+        const resumeInput = await page.$(resumeInputSelector);
+        console.log('Uploading resume');
+        await resumeInput.uploadFile(resumeFilePath);
+        
+        // Fill in additional fields if empty
+        await fillFieldIfEmpty(page, 'input[name="name"]', applicantData.name);
+        await fillFieldIfEmpty(page, 'input[name="email"]', applicantData.email);
+        await fillFieldIfEmpty(page, 'input[name="phone"]', applicantData.phone_number);
+        await fillFieldIfEmpty(page, 'input[name="urls[Portfolio]"]', applicantData.portfolio_link);
+
+        console.log("Completed form filling.");
+        return;
+        // Uncomment below lines to submit the form and take a screenshot
+        const submitButtonSelector = '#btn-submit';
+        await page.waitForSelector(submitButtonSelector, { visible: true });
+        await page.click(submitButtonSelector);
+        await page.waitForTimeout(30000); // waits for 30 seconds
+
+    } catch (error) {
+        console.error("An error occurred on URL:", job.url, error);
+        await page.screenshot({ path: `error-${job.url.replace(/[^a-zA-Z0-9]/g, '_')}.png` });
+    }
+
+    await browser.close();
 }
 
 async function leverJob(job, resumeFilePath) {
