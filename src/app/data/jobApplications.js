@@ -1,10 +1,9 @@
 const jobApplications = [
-   // av = ashish version
-// { url: "https://jobs.lever.co/platform-stud/9a8b8278-5ebe-4e6e-8109-c2e00876751e/apply/" }, // av: fills the required fields and resume autofiller adds some more things
-//{ url: "https://jobs.lever.co/loopreturns/9bce9d58-6c08-4c99-ba33-1f78da7691b3/apply" }, // av: same as above. except email answer had ":" in the start
-//{ url: "https://jobs.lever.co/zuru/2881367a-e584-44e2-ac73-dca4bbed73d9/apply" }, //av: same as first
-// applied { url: "https://jobs.lever.co/careernowbrands/f0a455f2-7bf6-40cc-a816-20595cdb0a64/apply?lever-source=Job%20postings%20feed" }, // av: one required checkbox was not caught
-// did not apply {url: "https://jobs.lever.co/matchgroup/3fec4bc1-c1b9-4c61-8716-b6a9e9cdbaad/apply" }, //av: some required checkboxes left answered
+
+//{ url: "https://jobs.lever.co/platform-stud/9a8b8278-5ebe-4e6e-8109-c2e00876751e/apply/" }, // everything filled correctly and submitted
+//{ url: "https://jobs.lever.co/loopreturns/9bce9d58-6c08-4c99-ba33-1f78da7691b3/apply" }, //everything filled correctly but then captcha
+//{ url: "https://jobs.lever.co/zuru/2881367a-e584-44e2-ac73-dca4bbed73d9/apply" }, //everything filled correctly but then captcha
+//{url: "https://jobs.lever.co/matchgroup/3fec4bc1-c1b9-4c61-8716-b6a9e9cdbaad/apply" }, //av: some required checkboxes left answered
 // applied ** phone number got messed up { url: "https://jobs.lever.co/blinkux/ef8be1e6-111f-4429-91a8-63482c2b7cb5/apply?lever-origin=applied&lever-source%5B%5D=weloveproduct.co" }, av: same as first
 //applied 
 //{ url: "https://jobs.lever.co/evisort-2/7d3add67-4d92-4bf6-aa43-f2b44b2c0866/apply" }, //av: same as first
@@ -67,16 +66,92 @@ const jobApplications = [
   
 
 
-{ url: "https://boards.greenhouse.io/rvohealth/jobs/4352369005" },
+//{ url: "https://boards.greenhouse.io/rvohealth/jobs/4352369005" },
 //{ url: "https://boards.greenhouse.io/affirm/jobs/5826511003" },
 //{ url: "https://boards.greenhouse.io/lastpass/jobs/4351184005" },
-//{ url: "https://boards.greenhouse.io/axon/jobs/5730344003?t=e4ea2ebb3us" },
+//{ url: "https://boards.greenhouse.io/axon/jobs/5730344003?t=e4ea2ebb3us" }, // this one has some other stuff im not sure if we want to auto fill those
 //{ url: "https://boards.greenhouse.io/affirm/jobs/5826513003" },
 //{ url: "https://boards.greenhouse.io/hugeinc/jobs/5552876" },
 //{ url: "https://boards.greenhouse.io/flohealth/jobs/5837145003?utm_source=The+FutureList+job+board&utm_medium=getro.com&gh_src=The+FutureList+job+board" },
 //{ url: "https://boards.greenhouse.io/onetrust/jobs/5582677" },
 //{ url: "https://boards.greenhouse.io/diligentcorporation/jobs/5037623004" },
 //{ url: "https://boards.greenhouse.io/webflow/jobs/5578685" }
+
+
+/** Lever jobs batch test (30 links) */
+//{ url: "https://jobs.lever.co/coforma/f3bb020d-54f8-4673-9514-321114b1eb60" },
+//{ url: "https://jobs.lever.co/woven-by-toyota/091129c9-95a0-4011-b34d-95ba32b05039" }, // everything filled and submitted?
+//{ url: "https://jobs.lever.co/plailabsinc/be43d908-882c-4916-920e-f9c77fed7ec7?lever-origin=applied&lever-source%5B%5D=a16z" },
+//{ url: "https://jobs.lever.co/xagroup/0062c6c3-6c29-461d-bfd3-eff5aee7f470" }, // filled and captcha'd
+{ url: "https://jobs.lever.co/binance/6ca979a8-0b6a-4659-a63f-ff8ff7ae6087" }, // filled and
+/*{ url: "https://jobs.lever.co/codecombat/256f6739-73e7-4553-bd40-164a92dd5644" },
+{ url: "https://jobs.lever.co/pachama/9e9cd21e-ba32-4c59-a05e-2ae40104de92" },
+{ url: "https://jobs.lever.co/sonatype/a8dfc062-9a9a-40ee-a89e-d367d46cd8ae" },
+{ url: "https://jobs.lever.co/finix/bad62268-0c03-4c8e-be1c-c1ce9fdf40fd" },
+{ url: "https://jobs.lever.co/sanas.ai/c7cfe1f3-d44b-4c35-a03e-ce34d021a238" },
+{ url: "https://jobs.lever.co/finix/bad62268-0c03-4c8e-be1c-c1ce9fdf40fd" },
+{ url: "https://jobs.lever.co/haus/f80629b9-5fcf-4cc9-ae16-fdc6f93c593a" },
+{ url: "https://jobs.lever.co/hyperscience/3b0a2f9c-98f2-42c3-bef6-46c206da83be" },
+{ url: "https://jobs.lever.co/ledger/5ecd9c1f-2155-4348-8399-663601524a50" },
+{ url: "https://jobs.lever.co/askfavor/d69d3f92-a737-479d-b72c-895956c56c41" },
+{ url: "https://jobs.lever.co/binance/6ca979a8-0b6a-4659-a63f-ff8ff7ae6087/apply" },
+{ url: "https://jobs.lever.co/revefi/ae80f838-35ab-4992-bc57-4af3816c2dbb/apply" },
+{ url: "https://jobs.lever.co/goswift/18f3e68b-e488-442c-8c76-52457e61023a" },
+{ url: "https://jobs.lever.co/formulamonks/ac23a6ff-781f-413a-9749-ae24f94fbbe6" },
+{ url: "https://jobs.lever.co/ledger/5ecd9c1f-2155-4348-8399-663601524a50/apply" },
+{ url: "https://jobs.lever.co/tripalink/2b2897fd-e236-4b2c-9e56-11ec3f9c38c3/apply" },
+{ url: "https://jobs.lever.co/veepee/8144ffd2-c5a7-4b4b-af07-9e458e56acaa" },
+{ url: "https://jobs.lever.co/Allata/10e9cc78-dfb7-45b5-8237-9a9248a492a3?utm_source=remote_rocketship&ref=remote_rocketship" },
+{ url: "https://jobs.lever.co/Instrumentl/c422f3ab-d3ea-4ac4-a923-3026b5cc9df7/apply" },
+{ url: "https://jobs.lever.co/payfit/a7e1532f-647c-458c-8c6d-6f717c67993a" },
+{ url: "https://jobs.lever.co/newton/6a267e12-15b6-4b88-abfd-276fd0ddc297" },
+{ url: "https://jobs.lever.co/varomoney/154cd830-0024-4887-80a9-c9e0d074f0cc?ref=levels.fyi&src=levels.fyi&utm_source=levels.fyi&lever-origin=applied&lever-source%5B%5D=levels.fyi" },
+{ url: "https://jobs.lever.co/golfscopeinc/5067cbfd-2620-4c1d-ac58-ac75346ccd16" },
+{ url: "https://jobs.lever.co/hiver/64ab793e-b29a-4cdc-91bd-6b299c218288/apply" },
+{ url: "https://jobs.lever.co/drivemode/bbbb7b6b-5477-4536-a585-dacb416afa8c/apply" },
+
+*/
+
+//{ url: "https://apply.workable.com/faroutscout/j/337D0AF6DE/" }, // asked for portfolio upload
+//{ url: "https://apply.workable.com/trademaniaapp/j/28D0A2346B" }, // filled and submitted
+//{ url: "https://apply.workable.com/liminalcustody/j/05587980FF/" }, // filled everything but answered 1 yes or no as true or false 
+//{ url: "https://apply.workable.com/700apps-2/j/04E20A2228/" }, // filled and submitted
+//{ url: "https://apply.workable.com/anovip-3/j/D140F83B91" }, // filled and submitted
+//{ url: "https://apply.workable.com/escape-velocity-entertainment-inc/j/71209AD993/apply" }, //filled and submitted
+//{ url: "https://apply.workable.com/futureverse/j/0D9A81191B/" }, // some anti bot activity
+//{ url: "https://apply.workable.com/j/F08F5E8E61/apply?utm_source=Flexaapplication" }, // answered yes or no with number
+//{ url: "https://apply.workable.com/blackstone-eit-2/j/73A8CAF739/" }, // answer true false as yes no, and answered a sentence when asked to respond between 1 to 5.
+//{ url: "https://apply.workable.com/therapynotes/j/31A91C8B73/apply/" }, // portfolio upload problem
+//{ url: "https://apply.workable.com/evolving-web/j/2BC934FFA0/" }, // true false answered yes no
+//{ url: "https://apply.workable.com/700apps-2/j/04E20A2228/apply/" }, // answered full sentence instead of number
+//{ url: "https://apply.workable.com/hownow/j/F08F5E8E61" }, //anti bot measures
+//{ url: "https://apply.workable.com/rebellion/j/26C3E166B4/" }, // anti bot measures
+//{ url: "https://apply.workable.com/jeeny/j/261A3E0BC5/" }, // yes no true false problem
+//{ url: "https://apply.workable.com/userbrain/j/7C08039EF1/" },//everything filled and answered correctly, but dropdown didn't work 
+
+//{ url: "https://apply.workable.com/evolving-web/j/740543C681/" }, //out of character responses by gpt
+//{ url: "https://apply.workable.com/anovip-3/j/D140F83B91/apply/" }, //filled and submitted
+//{ url: "https://apply.workable.com/lawnstarter/j/1128A68ED5" },
+/*{ url: "https://apply.workable.com/lawnstarter/j/828DA48A08" },
+{ url: "https://apply.workable.com/eventogy/j/F5067ADED9/" },
+{ url: "https://apply.workable.com/yodeck/j/818C530FC8/" },
+{ url: "https://apply.workable.com/mat3ra/j/045AD576C2/apply/" },
+{ url: "https://apply.workable.com/questronix-corporation-2/j/8472836B9F/" },
+{ url: "https://apply.workable.com/digital-waffle-2/j/4C8C92584B/" },
+{ url: "https://apply.workable.com/twinkl-ltd/j/931FD1B820/" },
+{ url: "https://apply.workable.com/digital-waffle-2/j/5EDFBE2F8F/" },
+{ url: "https://apply.workable.com/unison-consulting-pte-ltd/j/F647C9EF09/" },
+{ url: "https://apply.workable.com/evolving-web/j/347FAD3AAC/" },
+{ url: "https://apply.workable.com/twinkl-ltd/j/931FD1B820/apply/" },
+*/
+
+
+
+
+
+
+
+
 
 
 ];

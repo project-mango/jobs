@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import bestPractices from '../data/bestPractices.js';
 const apiKey = process.env.OPEN_AI_API_KEY; // Move this to environment variables for security
 const apiUrl = 'https://api.openai.com/v1/chat/completions';
 import OpenAI from "openai";
@@ -16,12 +16,12 @@ async function getAnswerFromGPT(prompt) {
             messages: [
               {
                 role: "system",
-                content: "You are a helpful assistant designed to output JSON.",
+                content: `You are a helpful assistant. When responding to job application questions, always follow these best practices:  ${JSON.stringify(bestPractices)}.`,
               },
               { role: "user", content: prompt },
             ],
             model: "gpt-3.5-turbo-1106",
-            response_format: { type: "json_object" },
+            //response_format: { type: "json_object" },
           });
           //console.log(completion.choices[0].message.content);
         return completion.choices[0].message.content.trim();

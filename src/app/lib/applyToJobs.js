@@ -23,16 +23,20 @@ async function findRequiredFields(page, selectors) {
         return [];
     }
     
+    let processedContainers = new Set();
     let requiredFieldContainers = [];
 
-    // Try each selector until we find required fields
+    // Try each selector
     for (const selector of selectors) {
-        requiredFieldContainers = await page.$$(selector);
-        if (requiredFieldContainers.length > 0) {
-            console.log(selector+" worked.")
-            break;
-        }else{
-            console.log(selector+" did not work.")
+        const containers = await page.$$(selector);
+        for (const container of containers) {
+            requiredFieldContainers.push(container);
+            const containerId = await container.evaluate(node => node.id || node.name);
+            console.log(containerId);
+            if (!processedContainers.has(containerId)) {
+                
+                processedContainers.add(containerId);
+            }
         }
     }
 
@@ -43,6 +47,19 @@ async function findRequiredFields(page, selectors) {
     // requiredFieldContainers = await page.$('#application-form');
 
     const fieldDetails = await Promise.all(requiredFieldContainers.map(async container => {
+        // Check for different indicators of required fields
+        const isRequired = await container.evaluate(node => {
+            return node.querySelector('input[required], textarea[required], select[required]') ||
+                node.querySelector('[aria-required="true"], [data-required="true"]') ||
+                node.textContent.includes('*') ||
+                node.textContent.toLowerCase().includes('required') ||
+                node.querySelector('[data-required="true"]') ||
+                node.querySelectorAll('input[type="radio"][required], input[type="checkbox"][required], select[required]').length > 0;
+        });
+
+        if (!isRequired) {
+            return null; // Skip if not marked as required
+        }
         const textElement = await container.$('.text');
         let questionText = '';
         if (textElement) {
@@ -50,13 +67,32 @@ async function findRequiredFields(page, selectors) {
         }
 
         // Handle input and textarea fields
-        const inputFields = await container.$$('input, textarea');
-        const inputAnswers = await Promise.all(inputFields.map(async field => {
-            const name = await field.evaluate(el => el.name);
-            const value = await field.evaluate(el => el.value);
+        // Filter out already filled input and textarea fields
+        const inputFields = (await container.$$('input, textarea'));
+
+        let isFieldFilled = false;
+        const inputAnswers = (await Promise.all(inputFields.map(async field => {
             const type = await field.evaluate(el => el.type || 'textarea');
-            return { name, value, type };
-        }));
+            if (type === "text" || type === "textarea") {
+                const name = await field.evaluate(el => el.name);
+                const value = await field.evaluate(el => el.value);
+                if (value.trim() !== '') {
+                    return null; // Skip this text input/textarea field as it's already filled
+                }
+                return { name, value, type };
+            } else {
+                // For non-text input fields, just return their details without checking if they're filled
+                const name = await field.evaluate(el => el.name);
+                const value = await field.evaluate(el => el.value);
+                return { name, value, type };
+            }
+        }))).filter(answer => answer !== null); // Remove nulls (skipped fields)
+    
+
+        // Skip the entire container if any text input/textarea is filled
+        if (isFieldFilled) {
+            return null;
+        }
 
         // Handle select (dropdown) fields
         const selectFields = await container.$$('select');
@@ -69,12 +105,13 @@ async function findRequiredFields(page, selectors) {
         }));
 
         // Combine input and select field answers
-        const answers = [...inputAnswers, ...selectAnswers];
+        const answers = [...inputAnswers, ...selectAnswers]
 
         return { question: questionText, answers };
     }));
     
-    return fieldDetails;
+    return fieldDetails.filter(field => field !== null);
+    //return fieldDetails.filter(field => field !== null && (field.question !== null || field.question !== "") && field.answers.length > 0);
 }
 
 async function findRequiredFieldsWorkable(page, selectors) {
@@ -118,6 +155,7 @@ async function findRequiredFieldsWorkable(page, selectors) {
 
     // Extract field details, skipping already filled fields
     const fieldDetails = await Promise.all(requiredFieldContainers.map(async container => {
+        
         const questionTextHandle = await container.$('span.styles--3da4O');
         const questionText = questionTextHandle ? await page.evaluate(el => el.textContent, questionTextHandle) : '';
 
@@ -156,43 +194,7 @@ async function findRequiredFieldsWorkable(page, selectors) {
             // No recognized input type found
             return null;
         }
-        /*const outerHTML = await container.evaluate(element => element.outerHTML);
-        //console.log(outerHTML);
-        
-        //if (value !== '') {
-        //    return null; // Skip this input as it already has a value
-        //}
 
-        // Extract the field's name and type
-        const name = await container.evaluate(el => el.name);
-        const type = await container.evaluate(el => el.type);
-        const value = await container.evaluate(el => el.value);
-       
-
-        // Assuming 'container' is the ElementHandle of the parent element that contains your span
-        //const labelSelector = ".styles--2kqW6";
-
-        // Find the label element inside the container
-        //const labelElement = await container.$(labelSelector);
-
-        // Extract the text from the label element
-        let questionText = '';
-        //if (labelElement) {
-        //    questionText = await labelElement.evaluate(el => el.innerText.trim());
-        //}
-        
-        // Structure the data into the desired format
-        //console.log({question: questionText, answers: [{name: name, value: value, type: type}]});
-        return {
-            question: questionText,
-            answers: [
-                {
-                    name: name,
-                    value: value,//"", // The value is empty since we are skipping filled inputs
-                    type: type
-                }
-            ]
-        };*/
     }));
     //console.log(fieldDetails.filter(detail => detail.answers.length > 0))
     return fieldDetails.filter(item => item);
@@ -249,7 +251,7 @@ async function findRequiredFieldsGreenhouse(page, selectors) {
            let name, type, value, options = [];
 
             // Extract the input field (e.g., for further actions like filling it out)
-            const inputField = await container.$('input[aria-required="true"]');
+            const inputField = await container.$('input[aria-required="true"], textarea[aria-required="true"]');
             const selectField = await container.$('select')
              // Extract the field's name and type
              if (inputField) {
@@ -261,9 +263,15 @@ async function findRequiredFieldsGreenhouse(page, selectors) {
                         value: input.value
                     };
                 });
+                //[name, type, value] = result;
+                
                 name = result.name;
                 type = result.type;
                 value = result.value;
+                if (value && value.trim() !== '') {
+                    console.log(`Field already filled: ${name}`);
+                    return null; // Skip this field
+                }
                 //console.log(`Name: ${name}, Type: ${type}, Value: ${value}`);
             }else if(selectField){
                 //create a list of answers where each option is stored like name, value and type
@@ -293,93 +301,6 @@ async function findRequiredFieldsGreenhouse(page, selectors) {
     return fieldDetails.filter(el=>el);
 };
 
-async function findRequiredFieldsInFirstForm(page) {
-    await page.waitForSelector('form');
-    const form = await page.$('form');
-
-    if (!form) {
-        console.log('No form found on the page.');
-        return [];
-    }
-    
-
-    const requiredFields = await form.$$('[required]');
-    const fieldDetails = [];
-    const processedFieldNames = new Set(); // A set to keep track of processed field names
-
-    for (const field of requiredFields) {
-    
-        const name = await field.evaluate(el => el.name);
-        const type = await field.evaluate(el => el.type);
-
-        if (type === 'file' || name === 'resume' ) {
-            continue; // Skip this field if already processed
-        }
-
-        processedFieldNames.add(name); // Add field name to the set
-
-        let labelText = await field.evaluate(el => {
-            if (el.labels.length > 0 && el.labels[0]) {
-                return el.labels[0].innerText.trim();
-            }
-            return '';
-        });
-
-        let answers = [];
-        console.log(type)
-        if (type === 'select') {
-            // Capture all options for select dropdown fields
-            answers = await field.$$eval('option', options => 
-                options.map(option => ({
-                    value: option.value,
-                    text: option.innerText.trim(),
-                    type: 'select'
-                })).filter(option => option.text.toLowerCase() !== 'select...')
-            );
-        } else if (type === 'radio' || type === 'checkbox') {
-            // Find all radio buttons or checkboxes with the same name
-            const sameNameFields = await form.$$(`input[name="${name}"][type="${type}"]`);
-            for (const sameNameField of sameNameFields) {
-                const value = await sameNameField.evaluate(el => el.value);
-                answers.push({ value, type });
-            }
-        }
-
-        // Update here to include type in each element
-        fieldDetails.push({ name, labelText, type: type, answers: answers.length > 0 ? answers : undefined });
-    }
-    const requiredFieldContainers = await page.$$('.application-question.custom-question');
-
-    const fieldDetails2 = await Promise.all(requiredFieldContainers.map(async container => {
-        const questionText = await container.$eval('.text', el => el.innerText.trim());
-
-        // Handle input and textarea fields
-        const inputFields = await container.$$('input, textarea');
-        const inputAnswers = await Promise.all(inputFields.map(async field => {
-            const name = await field.evaluate(el => el.name);
-            const value = await field.evaluate(el => el.value);
-            const type = await field.evaluate(el => el.type || 'textarea');
-            return { name, value, type };
-        }));
-
-        // Handle select (dropdown) fields
-        const selectFields = await container.$$('select');
-        const selectAnswers = await Promise.all(selectFields.map(async field => {
-            const name = await field.evaluate(el => el.name);
-            const options = await field.$$eval('option', options => options.map(option => option.innerText.trim()));
-            // Exclude the 'Select...' placeholder option if present
-            const filteredOptions = options.filter(option => option.toLowerCase() !== 'select...');
-            return { name, value: filteredOptions, type: 'select' };
-        }));
-
-        // Combine input and select field answers
-        const answers = [...inputAnswers, ...selectAnswers];
-
-        return { question: questionText, answers };
-    }));
-
-    return [...fieldDetails, ...fieldDetails2];
-}
 
 /*async function findRequiredFieldsInFirstForm(page) {
     await page.waitForSelector('form');
@@ -463,12 +384,26 @@ async function processQuestions(requiredFields, applicantData, page, resumeFileP
         const answerOptions = field.answers.map(a => a.value).join(", "); // Create a string of answer options
 
         // Construct a prompt that includes the answer options
-        const prompt = `Given the context: ${context}, and the answer options: ${answerOptions}, what is the best answer for the question: ${field.question}? Use these best practices ${bestPracticeText}`;
+        const prompt = `Given the context: ${context}, and the answer options: ${answerOptions}, what is the best answer for the question: ${field.question}? Use bestPractices. ${bestPracticeText}`;
         console.log("Question: ", field.question);
         const answer = await getAnswerFromGPT(prompt);
         console.log("GPT Answer:", answer);
 
        // Check if the field is a textarea or an input
+       if (field.question.includes("Location (City)")) {
+        const autoCompleteInputSelector = `input[name="${field.answers[0].name}"]`;
+        console.log("Handling autocomplete field:", autoCompleteInputSelector);
+        await page.type(autoCompleteInputSelector, answer, { delay: 100 });
+    
+        // Adjust the below selector based on how suggestions are rendered in the DOM
+        const suggestionsSelector = '#location_autocomplete-items-popup > li';
+        await page.waitForSelector(suggestionsSelector, { visible: true });
+        
+        // Select the first suggestion or the closest match
+        // This can be adjusted based on the specific implementation of the suggestions list
+        const firstSuggestionSelector = `${suggestionsSelector}:first-child`;
+        await page.click(firstSuggestionSelector);
+    }else 
        if (field.answers.length === 0 || field.answers[0].type === "textarea" || field.answers[0].type === "text") {
         // Handle both textarea and text input fields
         const fieldSelector = `textarea[name="${field.answers[0]?.name}"], input[name="${field.answers[0]?.name}"][type="text"]`;
@@ -509,66 +444,6 @@ function isMatch(optionValue, answer) {
     // Check if one string contains the other
     return normalizedAnswer.includes(normalizedOptionValue) || normalizedOptionValue.includes(normalizedAnswer);
 }
-async function processQuestions2(requiredFields, applicantData, page) {
-   
-    for (const field of requiredFields) {
-        
-        console.log("current field:",field)
-       // Check if the current field is the resume upload field
-       
-        const context = JSON.stringify(applicantData); // Convert applicant data to a string
-        const bestPracticeText = JSON.stringify(bestPractices);
-        //const answerOptions = field.answers.map(a => a.value).join(", "); // Create a string of answer options
-        //console.log(answerOptions);
-        const prompt = `Given the context: ${context}, and the answer options: ${field.answers}, what is the best answer for the question: ${field.labelText}? Use these best practices ${bestPracticeText}`;
-
-        //const prompt = `Given the context: ${context}, what is the best answer for the question: ${field.labelText}?`;
-        console.log(`Processing field with name: ${field.name}, type: ${field.type}`);
-        // Print only the current question
-        console.log("Current Question:", field.labelText);
-
-
-        const answer = await getAnswerFromGPT(prompt);
-
-        // Print the answer received from GPT
-        console.log("GPT's Answer:", answer);
-
-        // Selector for the field
-        const fieldSelector = `[name="${field.name}"]`;
-
-        // Handling different field types
-        
-        if (field.type === "textarea" || field.type === "text" || field.type === "email") {
-            console.log("Attempting to type into field:", fieldSelector);
-            await page.waitForSelector(fieldSelector, { visible: true });
-            await page.type(fieldSelector, answer, { delay: 100 });
-        } else if (field.type === "select") {
-            console.log("Selecting option in dropdown:", field.name, "Option:", answer);
-            await selectDropdownOption(page, field.name, answer);
-        } else if (field.type === "radio" || field.type === "checkbox") {
-            // Logic to interact with radio or checkbox fields based on the GPT answer
-            for (const option of field.answers) {
-                console.log('This is option.value:', option.value);
-                if (option.value === answer) {
-                    // Click the radio button or checkbox
-                    const selector = `input[name="${field.name}"][value="${option.value}"]`;
-                    console.log("Attempting to click on selector:", selector);
-                    await page.waitForSelector(selector, { visible: true });
-                    await page.click(selector);
-                    break; // Break the loop after clicking the correct option
-                }
-            }
-        }/*else if (field.type === "radio") {
-            const radioOptionSelector = `${fieldSelector}[value="${answer}"]`;
-            console.log("Attempting to click on radio option:", radioOptionSelector);
-            await page.waitForSelector(radioOptionSelector, { visible: true });
-            await page.click(radioOptionSelector);
-            //await page.waitForTimeout(1000); 
-        }*/
-        // Add additional logic here for other types of inputs if necessary
-    }
-}
-
 
 // a simple function for finding the "apply for this job" button
 async function clickApplyButton(buttonName, page, timeout = 3000){
@@ -641,8 +516,10 @@ async function workableJob(job, resumeFilePath){
     try {
         console.log("Navigating to URL:", job.url);
         await page.goto(job.url, { waitUntil: 'domcontentloaded' });
-
+        
         await clickApplyButton("a.button--2de5X", page);
+        
+        
 
         // Upload the resume
         // Selector for the button that triggers the file input
@@ -652,6 +529,7 @@ async function workableJob(job, resumeFilePath){
 
         // Wait for any JavaScript actions triggered by the button click to complete
         await page.waitForTimeout(1000); // Adjust the timeout as necessary
+              
 
         // Selector for the file input
         const fileInputSelector = 'input#file-upload[type="file"]';
@@ -689,6 +567,19 @@ async function workableJob(job, resumeFilePath){
         const requiredFields = await findRequiredFieldsWorkable(page, selectors);
         console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
 
+        try {
+            // Selector for the portfolio file input
+            const portfolioInputSelector = 'input[type="file"].styles--1lKzl';
+            await page.waitForSelector(portfolioInputSelector, { timeout: 5000 }); // Waits for the element to be present in the DOM
+        
+            // Upload the file
+            const portfolioInput = await page.$(portfolioInputSelector);
+            console.log('Uploading portfolio');
+            await portfolioInput.uploadFile(resumeFilePath);
+        } catch (error) {
+            console.log('Portfolio upload field not found or an error occurred:', error);
+        }
+
         await processQuestions(requiredFields, applicantData, page, resumeFilePath);
 
         const checkboxSelector = 'input[name="gdpr"]';       
@@ -701,9 +592,12 @@ async function workableJob(job, resumeFilePath){
             // Log the error and continue execution if the selector doesn't exist or times out
             console.log(`Selector "${checkboxSelector}" not found or timed out after ${timeout} ms.`, error.message);
         }
-        return;
+        //return;
         // Uncomment below lines to submit the form and take a screenshot
-        const submitButtonSelector = '#btn-submit';
+        console.log("Completed form filling. Going to submit in 30 seconds");
+        await page.waitForTimeout(30000);
+        const submitButtonSelector = '[data-ui="apply-button"]';
+
         await page.waitForSelector(submitButtonSelector, { visible: true });
         await page.click(submitButtonSelector);
         await page.waitForTimeout(30000); // waits for 30 seconds
@@ -731,30 +625,39 @@ async function greenhouseJob(job, resumeFilePath){
         console.log("Navigating to URL:", job.url);
         await page.goto(job.url, { waitUntil: 'domcontentloaded' });
 
-        await clickApplyButton("#apply_button", page); // thats name for those button in greenhouse
+        await clickApplyButton("#apply_button", page);
         const selectors = [
             ".field",//`[aria-required="true"]`
         ];
-    
-        const requiredFields = await findRequiredFieldsGreenhouse(page, selectors);
-        console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
-        
-        await processQuestions(requiredFields, applicantData, page, resumeFilePath);
-        return;
+  
         // Upload the resume
-        const resumeInputSelector = 'input[type="file"][name="resume"]';
+        const resumeInputSelector = 'input[type="file"][name="file"]';
         await page.waitForSelector(resumeInputSelector);
         const resumeInput = await page.$(resumeInputSelector);
-        console.log('Uploading resume');
+        console.log('Uploading resume, 5 sec wait');
         await resumeInput.uploadFile(resumeFilePath);
-        
+        await page.waitForTimeout(5000); 
         // Fill in additional fields if empty
-        await fillFieldIfEmpty(page, 'input[name="name"]', applicantData.name);
-        await fillFieldIfEmpty(page, 'input[name="email"]', applicantData.email);
-        await fillFieldIfEmpty(page, 'input[name="phone"]', applicantData.phone_number);
-        await fillFieldIfEmpty(page, 'input[name="urls[Portfolio]"]', applicantData.portfolio_link);
+        await fillFieldIfEmpty(page, '#first_name', applicantData.first_name);
+        await fillFieldIfEmpty(page, '#last_name', applicantData.last_name);
+        await fillFieldIfEmpty(page, '#email', applicantData.email);
+        await fillFieldIfEmpty(page, '#phone', applicantData.phone_number);
+        
 
-        console.log("Completed form filling.");
+        //console.log("Completed form filling.");
+        const requiredFields = await findRequiredFieldsGreenhouse(page, selectors);
+        console.log("Required Fields:", JSON.stringify(requiredFields, null, 2));
+        await processQuestions(requiredFields, applicantData, page, resumeFilePath);
+        const checkboxSelector = 'input[name="job_application[data_compliance][gdpr_processing_consent_given]"]';
+        const timeout = 5000;
+        try {
+            // Wait for the checkbox element to be available, with a timeout
+            await page.waitForSelector(checkboxSelector, { timeout });
+            await page.click(checkboxSelector);
+        } catch (error) {
+            // Log the error and continue execution if the selector doesn't exist or times out
+            console.log(`Selector "${checkboxSelector}" not found or timed out after ${timeout} ms.`, error.message);
+        }
         return;
         // Uncomment below lines to submit the form and take a screenshot
         const submitButtonSelector = '#btn-submit';
@@ -785,7 +688,23 @@ async function leverJob(job, resumeFilePath) {
         await page.goto(job.url, { waitUntil: 'domcontentloaded' });
 
         await clickApplyButton("a.postings-btn", page); // thats name for those button in lever.co
+        await page.waitForTimeout(10000);
+        // Upload the resume
+        const resumeInputSelector = 'input[type="file"][name="resume"]';
+        await page.waitForSelector(resumeInputSelector);
+        const resumeInput = await page.$(resumeInputSelector);
+        console.log('Uploading resume');
+        await resumeInput.uploadFile(resumeFilePath);
+        await page.waitForTimeout(30000);
+        // Fill in additional fields if empty
+        await fillIfEmpty(page, 'input[name="name"]', applicantData.name);
+        await fillIfEmpty(page, 'input[name="email"]', applicantData.email);
+        await fillIfEmpty(page, 'input[name="phone"]', applicantData.phone_number);
+        await fillIfEmpty(page, 'input[name="urls[Portfolio]"]', applicantData.portfolio_link);
+        
         const selectors = [
+            'input[required], textarea[required], select[required]',
+            'application-question custom-question',
             '.application-question.custom-question',
             '.application-question', 
             '.content-wrapper application-page',
@@ -798,26 +717,16 @@ async function leverJob(job, resumeFilePath) {
 
         await processQuestions(requiredFields, applicantData, page, resumeFilePath);
 
-        // Upload the resume
-        const resumeInputSelector = 'input[type="file"][name="resume"]';
-        await page.waitForSelector(resumeInputSelector);
-        const resumeInput = await page.$(resumeInputSelector);
-        console.log('Uploading resume');
-        await resumeInput.uploadFile(resumeFilePath);
         
-        // Fill in additional fields if empty
-        await fillFieldIfEmpty(page, 'input[name="name"]', applicantData.name);
-        await fillFieldIfEmpty(page, 'input[name="email"]', applicantData.email);
-        await fillFieldIfEmpty(page, 'input[name="phone"]', applicantData.phone_number);
-        await fillFieldIfEmpty(page, 'input[name="urls[Portfolio]"]', applicantData.portfolio_link);
 
-        console.log("Completed form filling.");
-        return;
+        console.log("Completed form filling. Going to submit in 30 seconds");
+        await page.waitForTimeout(30000);
         // Uncomment below lines to submit the form and take a screenshot
         const submitButtonSelector = '#btn-submit';
         await page.waitForSelector(submitButtonSelector, { visible: true });
         await page.click(submitButtonSelector);
         await page.waitForTimeout(30000); // waits for 30 seconds
+        return;
 
     } catch (error) {
         console.error("An error occurred on URL:", job.url, error);
@@ -827,12 +736,12 @@ async function leverJob(job, resumeFilePath) {
     await browser.close();
 }
 
-async function fillFieldIfEmpty(page, selector, value) {
+/*async function fillFieldIfEmpty(page, selector, value) {
     const isEmpty = await page.$eval(selector, (el) => el.value === '');
     if (isEmpty) {
         await page.type(selector, value, { delay: 100 });
     }
-}
+}*/
 
 // Run the function
 //applyToJobs();
