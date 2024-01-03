@@ -1,0 +1,31 @@
+.applyButton{
+    display: inline-flex;
+    padding: 16px 24px;
+    align-items: center; /* Changed from flex-start to center to align items vertically */
+    justify-content: center; /* Added to align items horizontally */
+    gap: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--Primary-Color, #7749F8);
+    background: var(--Default-White, #FFF);
+}
+
+
+.homeTabStyle{
+    color: var(--Primary-Color-Dark, #5227CC);
+
+    /* Body/ Base text */
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 28px; /* 175% */
+}
+
+.buttonStyle{
+    color: var(--Indigo-500, #6610F2);
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 18px; /* 112.5% */
+}
