@@ -44,9 +44,7 @@ export default function Page() {
         try {
             let { error } = await supabase.auth.signInWithOtp({ email });
             if (error) throw error;
-            else{
-                setAuthenticated(true);
-            }
+            
         } catch (error) {
             setAuthenticated(false);
         } finally {
