@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react';
 import styles from './styles/projectMangoStyle.module.css';
 import supabase from './data/supabase';
 
+
+
 export default function Page() {
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -27,7 +29,7 @@ export default function Page() {
       setLoading(true);
       try {
           const response = await fetch('/api', { method: 'POST' });
-          
+
           const data = await response.json();
           alert(data.message); // Displaying the message
       } catch (error) {

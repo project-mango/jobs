@@ -1,6 +1,6 @@
 import applyToJobs from '@/app/lib/applyToJobs';
 import downloadResume from '@/app/lib/downloadResume';
-import applicantData from '@/app/data/ApplicantData';
+import applicantData from '@/app/data/applicants';//'@/app/data/ApplicantData';
 
 //const applyToJobs = require('..applyToJobs.js');
 
