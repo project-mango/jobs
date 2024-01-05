@@ -8,6 +8,21 @@ import styles from './styles/projectMangoStyle.module.css';
 export default function Page() {
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+
+    // Effect to check authentication on mount
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: session } = await supabase.auth.getSession();
+            setIsAuthenticated(session.session != null && session.session.access_token != null);
+        };
+
+        checkAuth();
+    }, []);
+
+    // Handlers for form events
+    const handleEmailChange = (event) => {
+        setEmail(event.target.value);
+    };
   const handleApplyToJobs = async () => {
       setLoading(true);
       try {
@@ -101,7 +116,8 @@ export default function Page() {
                 id="emailInput"
                 placeholder="Enter email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange} 
+                
                 required
               />
             </div>
