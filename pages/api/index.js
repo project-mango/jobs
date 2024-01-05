@@ -1,13 +1,14 @@
 import applyToJobs from '@/app/lib/applyToJobs';
 import downloadResume from '@/app/lib/downloadResume';
-import applicantData from '@/app/data/applicants';//'@/app/data/ApplicantData';
-
+//import applicantData from '@/app/data/applicants';//'@/app/data/ApplicantData';
+import { applicantData, jobApplications, fetchData, fetchData2 } from '@/app/data/applicants';
 //const applyToJobs = require('..applyToJobs.js');
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
         try {
            // console.log("huh")
+           await fetchData();
             const resumeUrl = applicantData.resume_link; // URL of the resume
            // console.log(resumeUrl)
             const downloadFolder = './temp'; // Folder for the downloaded file

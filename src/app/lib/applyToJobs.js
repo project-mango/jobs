@@ -7,11 +7,7 @@ import getAnswerFromGPT from './getAnswerFromGPT.js';
 // Import puppeteer-extra and the stealth plugin
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import applicantData from '@/app/data/applicants';
-import jobApplications from '@/app/data/applicants';
-
-//minor change
-
+import { applicantData, jobApplications, fetchData, fetchData2 } from '../data/applicants.js';
 // Apply the stealth plugin
 puppeteer.use(StealthPlugin());
     

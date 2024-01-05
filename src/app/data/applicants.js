@@ -1,10 +1,10 @@
 import supabase from '../data/supabase.js';
 
 
-let applicantData = [];
-let jobApplications = [];
+export let applicantData = [];
+export let jobApplications = [];
 
-async function fetchData2() {
+export async function fetchData2() {
     let { data, error } = await supabase
         .from('jobs')
         .select('*')
@@ -12,7 +12,7 @@ async function fetchData2() {
     if (error) console.log('Error:', error)
     else {console.log('Jobs Data:', data); jobApplications = data}
 }
-async function fetchData() {
+export async function fetchData() {
     let { data, error } = await supabase
         .from('applicants')
         .select('*')
@@ -22,8 +22,5 @@ async function fetchData() {
 
     
 }
-
-fetchData();
-fetchData2();
 
 
