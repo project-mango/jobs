@@ -7,9 +7,9 @@ import applicantData from '@/app/data/ApplicantData';
 export default async function handler(req, res) {
   if (req.method === 'POST') {
         try {
-           // console.log("huh")
+            console.log("huh")
             const resumeUrl = applicantData.resume_link; // URL of the resume
-           // console.log(resumeUrl)
+           console.log(resumeUrl)
             const downloadFolder = './temp'; // Folder for the downloaded file
             const resumeFilePath = await downloadResume(resumeUrl, downloadFolder);
             //console.log(resumeFilePath);
