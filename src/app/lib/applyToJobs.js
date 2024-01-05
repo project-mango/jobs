@@ -1,17 +1,43 @@
 //import puppeteer from 'puppeteer';
-import jobApplications from '../data/jobApplications.js';
-import applicantData from '../data/ApplicantData.js';
+//import jobApplications from '../data/jobApplications.js';
+//import applicantData from '../data/ApplicantData.js';
 import bestPractices from '../data/bestPractices.js';
 import getAnswerFromGPT from './getAnswerFromGPT.js';
 
 // Import puppeteer-extra and the stealth plugin
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import supabase from '../data/supabase.js';
 
 
-
+let applicantData = [];
+let jobApplications = [];
 // Apply the stealth plugin
 puppeteer.use(StealthPlugin());
+    async function fetchData2() {
+        let { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+
+        if (error) console.log('Error:', error)
+        else {console.log('Jobs Data:', data); jobApplications = data}
+    }
+    async function fetchData() {
+        let { data, error } = await supabase
+            .from('applicants')
+            .select('*')
+    
+        if (error) console.log('Error:', error)
+        else {console.log('Applicant Data:', data); applicantData = data}
+
+        
+    }
+    //fetchData();
+
+
+
+
+
 
 async function findRequiredFields(page, selectors) {
     // wait for form to load
@@ -469,6 +495,9 @@ async function clickApplyButton(buttonName, page, timeout = 3000){
 
 // Define a function to apply to jobs
 async function applyToJobs(resumeFilePath) {
+    await fetchData();
+    await fetchData2();
+
     for (let job of jobApplications) {
         if (job.url.includes('workable.com')) {
             await workableJob(job, resumeFilePath);
