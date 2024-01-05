@@ -26,7 +26,7 @@ export default function Page() {
   const handleApplyToJobs = async () => {
       setLoading(true);
       try {
-          const response = await fetch('https://jobs-ten-umber.vercel.app/api', { method: 'POST' });
+          const response = await fetch('/api', { method: 'POST' });
           const data = await response.json();
           alert(data.message); // Displaying the message
       } catch (error) {
