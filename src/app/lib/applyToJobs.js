@@ -535,7 +535,7 @@ async function workableJob(job, resumeFilePath){
     console.log('Platform: Workable');
     const browser = await puppeteer.launch({ 
         headless: false, 
-        executablePath: "C:/Program Files/Google/Chrome Dev/Application/chrome.exe"
+        //executablePath: "C:/Program Files/Google/Chrome Dev/Application/chrome.exe"
     });
 
     const page = await browser.newPage();
@@ -643,7 +643,7 @@ async function greenhouseJob(job, resumeFilePath){
     console.log('Platform: Greenhouse');
     const browser = await puppeteer.launch({ 
         headless: false, 
-        executablePath: "C:/Program Files/Google/Chrome Dev/Application/chrome.exe"
+        //executablePath: "C:/Program Files/Google/Chrome Dev/Application/chrome.exe"
     });
 
     const page = await browser.newPage();
@@ -705,7 +705,7 @@ async function greenhouseJob(job, resumeFilePath){
 async function leverJob(job, resumeFilePath) {
     const browser = await puppeteer.launch({ 
         headless: false, 
-        executablePath: "C:/Program Files/Google/Chrome Dev/Application/chrome.exe"
+        //executablePath: "C:/Program Files/Google/Chrome Dev/Application/chrome.exe"
     });
 
     const page = await browser.newPage();
