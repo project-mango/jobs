@@ -27,6 +27,7 @@ export default function Page() {
       setLoading(true);
       try {
           const response = await fetch('/api', { method: 'POST' });
+          
           const data = await response.json();
           alert(data.message); // Displaying the message
       } catch (error) {
