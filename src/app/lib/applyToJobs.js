@@ -9,7 +9,7 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import supabase from '../data/supabase.js';
 
-
+//minor change
 let applicantData = [];
 let jobApplications = [];
 // Apply the stealth plugin
