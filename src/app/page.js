@@ -1,6 +1,6 @@
 "use client";
 // import Image from 'next/image'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // import styles from './page.module.css'
 import styles from './styles/projectMangoStyle.module.css';
 
