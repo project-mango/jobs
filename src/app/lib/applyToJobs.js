@@ -7,10 +7,31 @@ import getAnswerFromGPT from './getAnswerFromGPT.js';
 // Import puppeteer-extra and the stealth plugin
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { applicantData, jobApplications, fetchData, fetchData2 } from '../data/applicants.js';
+import supabase from '../data/supabase.js';
+
+//minor change
+let applicantData = [];
+let jobApplications = [];
 // Apply the stealth plugin
 puppeteer.use(StealthPlugin());
+    async function fetchData2() {
+        let { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+
+        if (error) console.log('Error:', error)
+        else {console.log('Jobs Data:', data); jobApplications = data}
+    }
+    async function fetchData() {
+        let { data, error } = await supabase
+            .from('applicants')
+            .select('*')
     
+        if (error) console.log('Error:', error)
+        else {console.log('Applicant Data:', data); applicantData = data}
+
+        
+    }
     //fetchData();
 
 
