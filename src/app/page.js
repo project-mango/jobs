@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 // import styles from './page.module.css'
 import styles from './styles/projectMangoStyle.module.css';
-
+import supabase from './data/supabase';
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ export default function Page() {
     useEffect(() => {
         const checkAuth = async () => {
             const { data: session } = await supabase.auth.getSession();
-            setIsAuthenticated(session.session != null && session.session.access_token != null);
+            setAuthenticated(session.session != null && session.session.access_token != null);
         };
 
         checkAuth();
@@ -107,24 +107,24 @@ export default function Page() {
           <h5 className="card-title">Sign Up for Updates</h5>
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label htmlFor="emailInput" className="form-label">
+                <label htmlFor="emailInput" className="form-label">
                 Email address
-              </label>
-              <input
+                </label>
+                <input
                 type="email"
                 className="form-control"
                 id="emailInput"
                 placeholder="Enter email"
                 value={email}
                 onChange={handleEmailChange} 
-                
                 required
-              />
+                />
             </div>
-            <button type="submit" className="btn btn-primary">
-              Sign Up
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? 'Loading...' : 'Sign Up'}
             </button>
-          </form>
+            </form>
+
         </div>
       </div>
     </div>
