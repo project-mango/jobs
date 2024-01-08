@@ -28,9 +28,9 @@ export default function Page() {
   const handleApplyToJobs = async () => {
       setLoading(true);
       try {
-
+          console.log("aaa");
           const response = await fetch('/api', { method: 'POST' });
-
+          console.log("bbb");
           const data = await response.json();
           alert(data.message); // Displaying the message
       } catch (error) {
