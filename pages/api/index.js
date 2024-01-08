@@ -5,6 +5,7 @@ import applicantData from '@/app/data/ApplicantData';
 //const applyToJobs = require('..applyToJobs.js');
 
 export default async function handler(req, res) {
+    console.log("hello");
   if (req.method === 'POST') {
         try {
             //console.log("huh")
