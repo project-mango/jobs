@@ -21,8 +21,10 @@ async function getAnswerFromGPT(prompt) {
               { role: "user", content: prompt },
             ],
             model: "gpt-3.5-turbo-1106",
+           
             //response_format: { type: "json_object" },
-          });
+          },
+          temperature=0); // try temperature 0
           //console.log(completion.choices[0].message.content);
         return completion.choices[0].message.content.trim();
     } catch (error) {
